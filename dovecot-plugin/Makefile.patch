@@ -1,0 +1,20 @@
+28,29c28,31
+< DOVECOT_MODULES = /usr/lib/dovecot/modules
+< DOVECOT_INCLUDES = /usr/include/dovecot
+---
+> DOVECOT_MODULES = /usr/local/lib/dovecot
+> DOVECOT_INCLUDES = /usr/local/include/dovecot
+>
+> .include <bsd.port.options.mk>
+43c45
+< 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -std=gnu99 -fPIC -shared -Wall -I${DOVECOT_INCLUDES} -DHAVE_CONFIG_H $< -o $@
+---
+> 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -std=gnu99 -fPIC -shared -Wall -I${DOVECOT_INCLUDES} -DHAVE_CONFIG_H $< -o $@ ${PLUGIN_SOURCES}
+46c48
+< 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -std=gnu99 -fPIC -shared -Wall -I${DOVECOT_INCLUDES} -DHAVE_CONFIG_H $< -o $@
+---
+> 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -std=gnu99 -fPIC -shared -Wall -I${DOVECOT_INCLUDES} -DHAVE_CONFIG_H $< -o $@ ${IMAP_PLUGIN_SOURCES}
+53a56,58
+>
+> .include <bsd.port.mk>
+>
