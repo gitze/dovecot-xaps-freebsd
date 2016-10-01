@@ -42,6 +42,6 @@ make all
 make install
 make clean
 
-# install dovecot2 plungin configuration
+# install dovecot2 plugin configuration
 cp xaps.conf /usr/local/etc/dovecot/conf.d/95-xaps.conf
 ```

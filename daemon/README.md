@@ -16,7 +16,9 @@ Installation on FreeBSD 10
 
 Prerequisites
 -------------
-Please read carefully the instructions on the [dovecot-xaps-plugin](https://github.com/st3fan/dovecot-xaps-plugin) project.
+Please read carefully the instructions on the [dovecot-xaps-daemon](https://github.com/st3fan/dovecot-xaps-daemon)project.
+This assumes that you have the exported `certificate.pem` and `key.pem` files in your home directory.
+
 
 I used the installation within following environment:
 * FreeBSD 10.3
@@ -24,7 +26,27 @@ I used the installation within following environment:
 * xaps dovecot2-plugin [dovecot-xaps-plugin](https://github.com/st3fan/dovecot-xaps-plugin)
 * using BASH and shell environment
 
+The daemon is written in [Go](http://golang.org/doc/install#install) and best build with the [GB](https://getgb.io/docs/install/) tool.
+I usually don't use this labguage and tools, wherefor I'll install them into a temporary location and remove them afterwards again
 
+
+Prepare Build environment
+```
+mkdir -p /tmp/xaps-build/
+cd /tmp/xaps-build/
+
+#Install GO environment
+fetch https://storage.googleapis.com/golang/go1.7.1.freebsd-amd64.tar.gz
+tar zxvf go1.7.1.freebsd-amd64.tar.gz
+
+export GOPATH=/tmp/xaps-build/work
+export GOROOT=/tmp/xaps-build/go
+export PATH=$PATH:$GOROOT/bin
+
+#Install GB environment
+go get github.com/constabulary/gb/...
+export PATH=$PATH:$GOPATH/bin
+```
 
 Compile and Installation
 --------------------------
@@ -35,106 +57,22 @@ cd /tmp/xaps-build/
 # get additional files and patches
 git clone https://github.com/gitze/dovecot-xaps-freebsd.git
 
-# get plugin source
-git clone https://github.com/st3fan/dovecot-xaps-plugin.git
-cd dovecot-xaps-plugin
 
-patch Makefile ../dovecot-xaps-freebsd/dovecot-plugin/Makefile.patch
-make all
-make install
-make clean
-
-# install dovecot2 plungin configuration
-cp xaps.conf /usr/local/etc/dovecot/conf.d/95-xaps.conf
-```
-
-Exporting and converting the certificate
-----------------------------------------
-```
-cd ~/Desktop
-openssl pkcs12 -in PushEmail.p12 -nocerts -nodes -out key.pem
-openssl pkcs12 -in PushEmail.p12 -clcerts -nokeys -out certificate.pem
-```
-
-You are going to need the following things to get this going:
-
-* Some patience and willingness to experiment - Although I run this project in production, it is still a very early version and it may contain bugs.
-* Because you will need a certificate to talk to the Apple Push Notifications Service, you can only run this software if you are migrating away from an existing OS X Server setup where you had Push Email enabled.
-* This software has only been tested on Ubuntu 12.04.5 with Dovecot 2.0.19. So ideally you have a mail server with the same specifications, or something very similar.
-
-Exporting and converting the certificate
-----------------------------------------
-
-First you have to export the certificate that is stored on your OS X
-Server. Do this by opening Keychain.app and select the System keychain and the Certificates category. Locate the right certificate by expanding those whose name start with *APSP:* and then look for the certificate with a private key that is named `com.apple.servermgrd.apns.mail`.
-
-Now export that certficate by selecting it and then choose *Export Items* from the *File* menu. You want to store the certificate as PushEmail on your Desktop as a *Personal Information Exchange (.p12)* file. You will be asked to secure this exported certificate with a password. This is a new password and not your login password.
-
-Then, start *Terminal.app* and execute the following commands:
-
-```
-cd ~/Desktop
-openssl pkcs12 -in PushEmail.p12 -nocerts -nodes -out key.pem
-openssl pkcs12 -in PushEmail.p12 -clcerts -nokeys -out certificate.pem
-```
-
-You will be asked for a password, which should be the same password that you entered when you exported the certificate.
-
-You can test if the certificate and key are correct by making a connection to the apple push notifications gateway:
-
-```
-openssl s_client -connect gateway.push.apple.com:2195 -cert certificate.pem -key key.pem
-```
-
-The connection may close but check if you see something like `Verify return code: 0 (ok)` appear.
-
-If the connection fails and outputs `Verify return code: 20 (unable to get local issuer certificate)` the chain of trust might be broken. Download the root certificate entrust_2048_ca.cer from [Entrust] (https://www.entrust.net/downloads/root_index.cfm?) and issue the command appending -CAfile:
-
-```
-openssl s_client -connect gateway.push.apple.com:2195 -cert certificate.pem -key key.pem -CAfile entrust_2048_ca.cer
-```
-
-> TODO: Does this mean we also need to pass the CA file to the `xapsd` process?
-
-You now have your exported certificate and private key stored in two separate PEM encoded files that can be used by the xapsd daemon.
-
-Copy these two files to your Dovecot server.
-
-> Note that the APNS certificates expire 1 year after they were originally issued by Apple, so they will need to be renewed or regenerated through the OS X Server application each year. Expiration information for these certificates can be found at the [Apple Push Certificates Portal](https://identity.apple.com/pushcert/).
-
-Compiling and Installing the Daemon
------------------------------------
-
-The daemon is written in Go. The easiest way to build it is with the [GB] (http://getgb.io/docs/install/) tool.
-
-```
+# get and compile daemon source, install daemon
 git clone https://github.com/st3fan/dovecot-xaps-daemon.git
 cd dovecot-xaps-daemon
 gb build all
+
+mkdir -p /usr/local/etc/xapsd
+cp cmd/xapsd /usr/local/bin
+
+# install startup script and enable daemon
+cp /tmp/xaps-build/dovecot-xaps-freebsd/daemon/rc-script/xaps /usr/local/etc/rc.d/
+echo 'xapsd_enable="YES"' >> /etc/rc.conf
+echo 'xapsd_debug="YES"' >> /etc/rc.conf
+
+cp $HOME/key.pem /usr/local/etc/xapsd
+cp $HOME/certificate.pem /usr/local/etc/xapsd
+chmod 600 /usr/local/etc/xapsd/key.pem
+chmod 600 /usr/local/etc/xapsd/certificate.pem
 ```
-
-You can find the dameon in `bin/xapsd`.
-
-Running the Daemon
-------------------
-
-Because this code is work in progress, it currently is not packaged properly as a good behaving background process. I recommend following the instructions below in a `screen` or `tmux` session so that it is easy to keep the daemon running. The next release will have better support for running this as a background service.
-
-You can run the daemon as follows:
-
-```
-bin/xapsd -key=$HOME/key.pem -certificate=$HOME/certificate.pem \
-  -database=$HOME/xapsd.json -socket=/tmp/xapsd.sock
-```
-
-This assumes that you have the exported `certificate.pem` and `key.pem` files in your home directory. The database file will be created by the daemon. It will contain the mappings between the IMAP users, their mail accounts and the iOS devices. It is a simple JSON file so you can look at it manually by opening it in a text editor.
-
-The daemon is verbose and should print out a bunch of informational messages. If you see errors, please [file a bug](https://github.com/st3fan/dovecot-xaps-daemon/issues/new).
-
-
-Setting up Devices
-------------------
-
-Your iOS devices will discover that the server supports Push automatically the first time they connect. To force them to reconnect you can reboot the iOS device or turn Airport Mode on and off with a little delay in between.
-
-If you go to your Email settings, you should see that the account has switched to Push.
