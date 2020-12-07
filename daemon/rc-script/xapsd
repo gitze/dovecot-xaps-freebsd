@@ -8,36 +8,28 @@
 # KEYWORD: shutdown
 
 #
-# Add the following lines to /etc/rc.conf[.local] to enable xaps:
+# Add the following lines to /etc/rc.conf[.local] to enable xapsd:
 # xapsd_enable="YES"
-# xapsd_debug="YES" will start xaps with debug logging
 #
-
-# bin/xapsd -debug -key=./key.pem -certificate=./certificate.pem -database=./xapsd.json -socket=/var/run/dovecot/xapsd.sock >> /var/log/xapsd.log 2>&1 &
 
 . /etc/rc.subr
 
 name="xapsd"
-rcvar=${name}_enable
+rcvar=xapsd_enable
 
 load_rc_config $name
 
 #defaults
 : ${xapsd_enable="NO"}
-: ${xapsd_debug="NO"}
-: ${xapsd_cmd="/usr/local/bin/${name}"}
-: ${xapsd_log="/var/log/xapsd.log"}
-: ${xapsd_socket="/var/run/dovecot/xapsd.sock"}
-: ${xapsd_home="/usr/local/etc/${name}"}
-: ${xapsd_key="${xapsd_home}/key.pem"}
-: ${xapsd_certificate="${xapsd_home}/certificate.pem"}
-: ${xapsd_database="${xapsd_home}/xapsd.json"}
-: ${xapsd_pidfile="/var/run/dovecot/xapsd.pid"}
+: ${xapsd_pidfile:-/var/run/dovecot/xapsd.pid}
+: ${xapsd_configname="xapsd.yaml"}
+: ${xapsd_configpath="/usr/local/etc/xapsd"}
 
-command=${xapsd_cmd}
-pidfile=${xapsd_pidfile}
-checkyesno xapsd_debug && command_args=" -debug" || command_args=""
-command_args="$command_args -key=${xapsd_key} -certificate=${xapsd_certificate} -database=${xapsd_database} -socket=${xapsd_socket} >> ${xapsd_log} 2>&1"
-start_cmd="/usr/sbin/daemon -p $pidfile $command $command_args"
+command=/usr/local/bin/${name}
+
+#required_dirs=/var/db/xapsd
+required_files=/usr/local/etc/${xapsd_configname}
+
+command_args="-configPath ${xapsd_configpath} -configName ${xapsd_configname}"
 
 run_rc_command "$1"
