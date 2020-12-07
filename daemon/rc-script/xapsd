@@ -28,7 +28,7 @@ load_rc_config $name
 command=/usr/local/bin/${name}
 
 #required_dirs=/var/db/xapsd
-required_files=/usr/local/etc/xapsd/${xapsd_configname}
+required_files=${xapsd_configpath}/${xapsd_configname}
 
 command_args="-configPath ${xapsd_configpath} -configName ${xapsd_configname}"
 
