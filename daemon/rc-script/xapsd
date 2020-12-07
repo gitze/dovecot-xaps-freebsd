@@ -2,34 +2,65 @@
 # $FreeBSD
 #
 
-# PROVIDE: xapsd
+# PROVIDE: xaps
 # REQUIRE: DAEMON  @comment  %%CLAMD%%
 # BEFORE: mail
 # KEYWORD: shutdown
 
 #
-# Add the following lines to /etc/rc.conf[.local] to enable xapsd:
+# Add the following lines to /etc/rc.conf[.local] to enable xaps:
 # xapsd_enable="YES"
 #
 
 . /etc/rc.subr
 
 name="xapsd"
-rcvar=xapsd_enable
+rcvar=${name}_enable
 
 load_rc_config $name
 
 #defaults
 : ${xapsd_enable="NO"}
+: ${xapsd_cmd="/usr/local/bin/xapsd"}
+: ${xapsd_log="/var/log/xapsd.log"}
 : ${xapsd_pidfile:-/var/run/dovecot/xapsd.pid}
-: ${xapsd_configname="xapsd.yaml"}
 : ${xapsd_configpath="/usr/local/etc/xapsd"}
+: ${xapsd_configname="xapsd.yaml"}
 
-command=/usr/local/bin/${name}
+start_cmd="${name}_start"
+stop_cmd="${name}_stop"
+restart_cmd="${name}_restart"
 
-#required_dirs=/var/db/xapsd
+required_dirs=${xapsd_configpath}
 required_files=${xapsd_configpath}/${xapsd_configname}
 
-command_args="-configPath ${xapsd_configpath} -configName ${xapsd_configname}"
+xapsd_start()
+{
+   command_args=""
+   command_args="$command_args"
+   # command_args="-configPath ${xapsd_configpath} -configName ${xapsd_configname}"
+   echo $command_args
+   ${xapsd_cmd} ${command_args} >> ${xapsd_log=} 2>&1 &
+   echo $! > ${xapsd_pidfile}
+}
+
+
+xapsd_stop()
+{
+   kill `cat ${xapsd_pidfile}`
+   rm ${xapsd_pidfile}
+}
+
+
+xapsd_restart()
+{
+   kill `cat ${xapsd_pidfile}`
+   xapsd_start
+}
 
 run_rc_command "$1"
+
+
+
+
+
