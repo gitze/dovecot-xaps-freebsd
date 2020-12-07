@@ -37,7 +37,7 @@ required_files=${xapsd_configpath}/${xapsd_configname}
 xapsd_start()
 {
    command_args="-configPath ${xapsd_configpath} -configName ${xapsd_configname}"
-   ${xapsd_cmd} ${command_args} 2>&1 &
+   ${xapsd_cmd} ${command_args} >> ${xapsd_log} 2>&1 &
    echo $! > ${xapsd_pidfile}
 }
 
