@@ -1,0 +1,10 @@
+--- CMakeLists.txt	2020-08-18 14:29:36.000000000 +0200
++++ CMakeLists.txt.new	2020-12-07 22:10:44.000000000 +0100
+@@ -34,5 +34,5 @@
+ set_target_properties(lib25_xaps_push_notification_plugin PROPERTIES PREFIX "")
+ set_target_properties(lib25_xaps_imap_plugin PROPERTIES PREFIX "")
+ 
+-install(TARGETS lib25_xaps_push_notification_plugin DESTINATION /usr/lib/dovecot/modules)
+-install(TARGETS lib25_xaps_imap_plugin DESTINATION /usr/lib/dovecot/modules)
++install(TARGETS lib25_xaps_push_notification_plugin DESTINATION /usr/local/lib/dovecot)
++install(TARGETS lib25_xaps_imap_plugin DESTINATION /usr/local/lib/dovecot)
