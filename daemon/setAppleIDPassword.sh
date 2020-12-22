@@ -2,7 +2,7 @@
 # using read command without any variable
 # change to "read -sp" if password input should be hidden
 configfile="$1"
-[[ "$configfile" == "" ]] && configfile="xapsd.yaml" && echo "please pass $configfile as first paramater." 
+[[ "$configfile" == "" ]] && configfile="/etc/xapsd.yaml" && echo "please pass locstion of xapsd.yaml as first paramater." 
 echo "Using config file: ./$configfile"
 
 read -p 'Username: ' uservar
