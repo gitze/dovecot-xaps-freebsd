@@ -1,9 +1,17 @@
 #!/bin/bash
 # using read command without any variable
 # change to "read -sp" if password input should be hidden
-configfile="$1"
-[[ "$configfile" == "" ]] && configfile="/etc/xapsd.yaml" && echo "please pass locstion of xapsd.yaml as first paramater." 
-[[ ! -f "$configfile" ]] && echo "ConfigFile '$configfile' not found. Exiting script" && exit 1
+
+configparam="$1"
+
+[[ "$configparam" == "" ]] && echo "please pass locstion of xapsd.yaml as first paramater." 
+for configfile in  "$configfile" '/etc/xapsd.yaml' '/usr/local/etc/xapsd/xapsd.yaml' ;
+do
+    [[ "$configfile" == ""  ]] && continue
+    [[ -f "$configfile" ]] && break
+done
+[[ ! -f "$configfile" ]] && echo "ConfigFile '$configparam' not found. Exiting script" && exit 1
+
 echo "Using config file: ./$configfile"
 
 read -p 'Username: ' uservar
