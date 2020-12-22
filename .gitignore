@@ -1,0 +1,4 @@
+
+daemon/xapsd.yaml
+*.bak
+.DS_Store
