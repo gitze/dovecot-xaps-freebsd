@@ -1,25 +1,19 @@
 #!/bin/sh
-# $FreeBSD
 #
-
-# PROVIDE: xaps
-# REQUIRE: DAEMON  @comment  %%CLAMD%%
-# BEFORE: mail
-# KEYWORD: shutdown
-
-#
-# Add the following lines to /etc/rc.conf[.local] to enable xaps:
-# xapsd_enable="YES"
-#
+# PROVIDE: goprogram
+# REQUIRE: networking
+# KEYWORD:
 
 . /etc/rc.subr
 
 name="xapsd"
 rcvar=${name}_enable
 
+
+#load config
 load_rc_config $name
 
-#defaults
+#set defaults
 : ${xapsd_enable="NO"}
 : ${xapsd_cmd="/usr/local/bin/xapsd"}
 : ${xapsd_log="/var/log/xapsd.log"}
@@ -27,39 +21,24 @@ load_rc_config $name
 : ${xapsd_configpath="/usr/local/etc/xapsd"}
 : ${xapsd_configname="xapsd.yaml"}
 
-start_cmd="${name}_start"
-stop_cmd="${name}_stop"
-restart_cmd="${name}_restart"
-status_cmd="${name}_status"
-
+#check requirements
 required_dirs=${xapsd_configpath}
 required_files=${xapsd_configpath}/${xapsd_configname}
 
-
-xapsd_start()
+stop_postcmd="xapsd_shutdown"
+xapsd_shutdown()
 {
-#    command_args="-configPath ${xapsd_configpath} -configName ${xapsd_configname}"
-#    ${xapsd_cmd} ${command_args} >> ${xapsd_log} 2>&1 &
-#    echo $! > ${xapsd_pidfile}
-    command_args="-configPath ${xapsd_configpath} -configName ${xapsd_configname} >> ${xapsd_log} 2>&1"
-    start_cmd="/usr/sbin/daemon -p ${xapsd_pidfile} ${xapsd_cmd} ${command_args}"
+  if [ -e "${pidfile}" ]; then
+    echo "Stopping supervising daemon."
+    kill -s TERM `cat ${pidfile}`
+  fi
 }
 
-xapsd_stop()
-{
-   kill `cat ${xapsd_pidfile}`
-   rm ${xapsd_pidfile}
-}
 
-xapsd_restart()
-{
-   kill `cat ${xapsd_pidfile}`
-   xapsd_start
-}
+pidfile=${xapsd_pidfile}
+xapsd_args="-configPath ${xapsd_configpath} -configName ${xapsd_configname}"
+command="/usr/sbin/daemon"
+command_args="-P ${pidfile} -r -f -m 3 -o ${xapsd_log} ${xapsd_cmd} ${xapsd_args}"
 
-xapsd_status()
-{
-   ps aux -p $(cat ${xapsd_pidfile})
-}
 
 run_rc_command "$1"
