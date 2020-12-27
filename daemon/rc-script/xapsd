@@ -30,36 +30,36 @@ load_rc_config $name
 start_cmd="${name}_start"
 stop_cmd="${name}_stop"
 restart_cmd="${name}_restart"
+status_cmd="${name}_status"
 
 required_dirs=${xapsd_configpath}
 required_files=${xapsd_configpath}/${xapsd_configname}
 
-command_args="-configPath ${xapsd_configpath} -configName ${xapsd_configname} >> ${xapsd_log} 2>&1"
-start_cmd="/usr/sbin/daemon -p $xapsd_pidfile $xapsd_cmd $command_args"
 
-
-# xapsd_start()
-# {
+xapsd_start()
+{
 #    command_args="-configPath ${xapsd_configpath} -configName ${xapsd_configname}"
 #    ${xapsd_cmd} ${command_args} >> ${xapsd_log} 2>&1 &
 #    echo $! > ${xapsd_pidfile}
-# }
+    command_args="-configPath ${xapsd_configpath} -configName ${xapsd_configname} >> ${xapsd_log} 2>&1"
+    start_cmd="/usr/sbin/daemon -p ${xapsd_pidfile} ${xapsd_cmd} ${command_args}"
+}
 
-# xapsd_stop()
-# {
-#    kill `cat ${xapsd_pidfile}`
-#    rm ${xapsd_pidfile}
-# }
+xapsd_stop()
+{
+   kill `cat ${xapsd_pidfile}`
+   rm ${xapsd_pidfile}
+}
 
-# xapsd_restart()
-# {
-#    kill `cat ${xapsd_pidfile}`
-#    xapsd_start
-# }
+xapsd_restart()
+{
+   kill `cat ${xapsd_pidfile}`
+   xapsd_start
+}
+
+xapsd_status()
+{
+   ps aux -p $(cat ${xapsd_pidfile})
+}
 
 run_rc_command "$1"
-
-
-
-
-
