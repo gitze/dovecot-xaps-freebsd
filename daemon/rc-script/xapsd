@@ -25,14 +25,14 @@ load_rc_config $name
 required_dirs=${xapsd_configpath}
 required_files=${xapsd_configpath}/${xapsd_configname}
 
-stop_postcmd="xapsd_shutdown"
-xapsd_shutdown()
-{
-  if [ -e "${pidfile}" ]; then
-    echo "Stopping supervising daemon."
-    kill -s TERM `cat ${pidfile}`
-  fi
-}
+# stop_postcmd="xapsd_shutdown"
+# xapsd_shutdown()
+# {
+#   if [ -e "${pidfile}" ]; then
+#     echo "Stopping supervising daemon."
+#     kill -s TERM `cat ${pidfile}`
+#   fi
+# }
 
 
 pidfile=${xapsd_pidfile}
