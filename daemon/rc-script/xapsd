@@ -34,7 +34,6 @@ required_files=${xapsd_configpath}/${xapsd_configname}
 #   fi
 # }
 
-
 pidfile=${xapsd_pidfile}
 xapsd_args="-configPath ${xapsd_configpath} -configName ${xapsd_configname}"
 command="/usr/sbin/daemon"
