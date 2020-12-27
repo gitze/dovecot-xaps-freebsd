@@ -3,7 +3,7 @@
 # change to "read -sp" if password input should be hidden
 
 configparam="$1"
-for configfile in  "$configparam" "/etc/xapsd.yaml" "/usr/local/etc/xapsd/xapsd.yaml" ;
+for configfile in  "$configparam" "/etc/xapsd.yaml" "/usr/local/etc/xapsd/xapsd.yaml" "./xapsd.yaml" ;
 do
     [[ "$configfile" == ""  ]] && continue
     [[ -f "$configfile" ]] && break
