@@ -2,3 +2,4 @@
 daemon/xapsd.yaml
 *.bak
 .DS_Store
+daemon/rc-script/xapsd_new
