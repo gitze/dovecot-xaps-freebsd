@@ -22,8 +22,9 @@ read -p 'Username: ' uservar
 read -p 'Password: ' passvar 
 [[ "$uservar" == "" ]] && echo "No username set. Exiting script" && exit 1
 [[ "$passvar" == "" ]] && echo "No password set. Exiting script" && exit 1
-hashvalue=`echo -n "$passvar" | openssl dgst -sha256 -binary | xxd -p -c 32`
-
+# LINUX: hashvalue=`echo -n "$passvar" | openssl dgst -sha256 -binary | xxd -p -c 32`
+# if xxd is not installed then use hexdump
+hashvalue=`echo -n "$passvar" | openssl dgst -sha256 -binary | hexdump  -e '32/1 "%2.2x""\n"' -n 32`
 sed -E -i "" "s/^(appleId[[:blank:]]*[=|:][[:blank:]]*).*/\1$uservar/" "$configfile"
 sed -E -i "" "s/^(appleIdHashedPassword[[:blank:]]*[=|:][[:blank:]]*).*/\1$hashvalue/" "$configfile"
 
