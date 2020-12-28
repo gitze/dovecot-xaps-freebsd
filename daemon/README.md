@@ -69,10 +69,5 @@ cp cmd/xapsd /usr/local/bin
 # install startup script and enable daemon
 cp /tmp/xaps-build/dovecot-xaps-freebsd/daemon/rc-script/xaps /usr/local/etc/rc.d/
 echo 'xapsd_enable="YES"' >> /etc/rc.conf
-echo 'xapsd_debug="YES"' >> /etc/rc.conf
 
-cp $HOME/key.pem /usr/local/etc/xapsd
-cp $HOME/certificate.pem /usr/local/etc/xapsd
-chmod 600 /usr/local/etc/xapsd/key.pem
-chmod 600 /usr/local/etc/xapsd/certificate.pem
 ```
