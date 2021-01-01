@@ -1,43 +1,35 @@
 #!/bin/sh
 #
 # PROVIDE: xapsd
-# REQUIRE: networking
-# KEYWORD:
+# REQUIRE: LOGIN cleanvar dovecot
+# KEYWORD: shutdown
+
+#
+# Add the following lines to /etc/rc.conf[.local] to enable xaps:
+# xapsd_enable="YES"
+#
 
 . /etc/rc.subr
 
 name="xapsd"
 rcvar=${name}_enable
 
-
-#load config
 load_rc_config $name
 
-#set defaults
+
+#defaults
 : ${xapsd_enable="NO"}
 : ${xapsd_cmd="/usr/local/bin/xapsd"}
 : ${xapsd_log="/var/log/xapsd.log"}
-: ${xapsd_pidfile="/var/run/dovecot/xapsd.pid"}
-: ${xapsd_configpath="/usr/local/etc/xapsd"}
-: ${xapsd_configname="xapsd.yaml"}
+: ${xapsd_pidfile="/var/run/xapsd/xapsd.pid"}
+#: ${xapsd_configpath="/usr/local/etc/xapsd"}
+#: ${xapsd_configname="xapsd.yaml"}
 
-#check requirements
-required_dirs=${xapsd_configpath}
-required_files=${xapsd_configpath}/${xapsd_configname}
-
-# stop_postcmd="xapsd_shutdown"
-# xapsd_shutdown()
-# {
-#   if [ -e "${pidfile}" ]; then
-#     echo "Stopping supervising daemon."
-#     kill -s TERM `cat ${pidfile}`
-#   fi
-# }
+#xapsd_args="-configPath ${xapsd_configpath} -configName ${xapsd_configname}"
+xapsd_args=""
 
 pidfile=${xapsd_pidfile}
-xapsd_args="-configPath ${xapsd_configpath} -configName ${xapsd_configname}"
 command="/usr/sbin/daemon"
 command_args="-P ${pidfile} -r -f -m 3 -o ${xapsd_log} ${xapsd_cmd} ${xapsd_args}"
-
 
 run_rc_command "$1"
